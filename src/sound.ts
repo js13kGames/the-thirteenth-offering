@@ -1,5 +1,28 @@
 import { Music, Sound } from 'littlejsengine';
 
+export const soundAttack = new Sound([
+  0.6,
+  ,
+  189,
+  0.02,
+  0.04,
+  0.02,
+  4,
+  ,
+  ,
+  -16,
+  -276,
+  0.09,
+  ,
+  0.8,
+  ,
+  ,
+  ,
+  0.54,
+  0.02,
+  0.01,
+  774,
+]);
 export const soundPowerUp = new Sound([, , 559, 0.07, 0.16, 0.25, , 2.5, , , 349, 0.07, 0.07, , , , , 0.7, 0.19, 0.26]);
 export const soundHeal = new Sound([1.1, , 327, 0.01, 0.02, 0.15, , 3.6, 10, , , , , , , , , 0.53]);
 export const soundDamaged = new Sound([1.9, , 336, , 0.03, 0.14, 3, 1.6, , -3, , , , 1.9, , 0.2, , 0.49, , , 200]);

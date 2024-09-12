@@ -12,12 +12,10 @@ import {
   spawnBoss,
   spawnItem,
 } from './main';
-import { damageParticle, summonBoss } from './particles';
+import { damageParticle, fountainParticle } from './particles';
 import { soundBossSummon, soundEnemyDie } from './sound';
 
 const BASE_VELOCITY = 0.025;
-const SMALL_WALK_INDEX = [9, 10, 11, 10];
-const BOSS_WALK_TILE = [2, 2, 3, 3];
 const ENEMY_BASE_HP = 20;
 const BOSS_BASE_HP = 50;
 const ENEMY_BASE_DAMAGE = 10;
@@ -68,17 +66,18 @@ export class SmallEnemy extends Enemy {
 
   update(): void {
     super.update();
-    this.tileInfo = tile(SMALL_WALK_INDEX[Math.floor(wave(4, 3.9))]);
+    this.tileInfo = tile([9, 10, 11, 10][Math.floor(wave(4, 3.9))]);
     if (this.hp <= 0) {
       if (randInt(1, 100) > 90) spawnItem(this.pos, 'heart');
       const bossAppear = shouldSpawnBoss();
       if (bossAppear) {
         soundBossSummon.play();
-        summonBoss(this.pos);
+        const particle = fountainParticle(this.pos, true);
 
         setTimeout(() => {
           setCameraPos(player.pos);
           spawnBoss(this.pos);
+          particle.destroy();
           increaseDifficulty();
         }, 1000);
       }
@@ -100,7 +99,7 @@ export class BossEnemy extends Enemy {
 
   update(): void {
     super.update();
-    this.tileInfo = tile(BOSS_WALK_TILE[Math.floor(wave(4, 3.9))], 32);
+    this.tileInfo = tile([2, 2, 3, 3][Math.floor(wave(4, 3.9))], 32);
 
     if (this.hp <= 0) {
       spawnItem(this.pos);

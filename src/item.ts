@@ -1,7 +1,7 @@
 import { EngineObject, ParticleEmitter, randSign, tile, vec2, Vector2 } from 'littlejsengine';
 import Player from './player';
 import { soundHeal, soundPowerUp } from './sound';
-import { damageParticle, itemParticle } from './particles';
+import { damageParticle, fountainParticle } from './particles';
 import { gameState, objects } from './main';
 
 export type Type = 'heart' | 'sword';
@@ -20,7 +20,7 @@ class Item extends EngineObject {
     this.type = appliedType;
     this.index = index;
     this.direction = 0.005;
-    this.particle = itemParticle(pos);
+    this.particle = fountainParticle(pos);
   }
 
   update(): void {

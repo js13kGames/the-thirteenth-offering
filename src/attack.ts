@@ -1,7 +1,7 @@
 import { clamp, Color, EngineObject, tile, Timer, vec2, Vector2 } from 'littlejsengine';
 import Enemy, { BossEnemy } from './enemy';
 import { damageParticle } from './particles';
-import { soundAttackHit } from './sound';
+import { soundAttack, soundAttackHit } from './sound';
 
 class Attack extends EngineObject {
   spawnTimer: Timer;
@@ -12,6 +12,7 @@ class Attack extends EngineObject {
     this.damage = damage;
     this.spawnTimer = new Timer(0.2);
     this.setCollision();
+    soundAttack.play();
   }
 
   update(): void {
