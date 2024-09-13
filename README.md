@@ -15,6 +15,15 @@ My first try at coding a game and being submitted to [JS13KGames](https://js13kg
 
 Play a survival game to fight the dark cult. Following the ancient legend, everytime you kill 13 cultist, a demon appears.
 
+
+### Running
+
+To run local environment:
+```
+$ npm i
+$ npm run dev 
+```
+
 ### Created with:
 
 - LittleJS - https://github.com/KilledByAPixel/LittleJS
