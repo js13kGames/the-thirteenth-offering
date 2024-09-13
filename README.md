@@ -15,6 +15,8 @@ My first try at coding a game and being submitted to [JS13KGames](https://js13kg
 
 Play a survival game to fight the dark cult. Following the ancient legend, everytime you kill 13 cultist, a demon appears.
 
+Submitted and can be played at: https://dev.js13kgames.com/2024/games/the-thirteenth-offering
+
 
 ### Running
 
