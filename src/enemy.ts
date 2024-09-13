@@ -53,10 +53,9 @@ class Enemy extends EngineObject {
 
   approach() {
     if (player.hp <= 0) return;
-    const directionY = Math.sign(player.pos.y - this.pos.y);
-    const directionX = Math.sign(player.pos.x - this.pos.x);
-    this.pos.y = this.pos.y + BASE_VELOCITY * directionY * randInt(0, 3);
-    this.pos.x = this.pos.x + BASE_VELOCITY * directionX * randInt(0, 3);
+    const dy = Math.sign(player.pos.y - this.pos.y);
+    const dx = Math.sign(player.pos.x - this.pos.x);
+    this.pos = this.pos.add(vec2(BASE_VELOCITY * dx * randInt(0, 3), BASE_VELOCITY * dy * randInt(0, 3)));
   }
 }
 

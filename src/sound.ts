@@ -23,7 +23,6 @@ export const soundAttack = new Sound([
   0.01,
   774,
 ]);
-export const soundPowerUp = new Sound([, , 559, 0.07, 0.16, 0.25, , 2.5, , , 349, 0.07, 0.07, , , , , 0.7, 0.19, 0.26]);
 export const soundHeal = new Sound([1.1, , 327, 0.01, 0.02, 0.15, , 3.6, 10, , , , , , , , , 0.53]);
 export const soundDamaged = new Sound([1.9, , 336, , 0.03, 0.14, 3, 1.6, , -3, , , , 1.9, , 0.2, , 0.49, , , 200]);
 export const soundAttackHit = new Sound([, , 351, , 0.01, , 3, 1.3, 7, , , , , 0.9, , 0.4, , 0.67, 0.07, 0.33]);

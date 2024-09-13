@@ -25,8 +25,7 @@ class Attack extends EngineObject {
 
   collideWithObject(object: EngineObject): boolean {
     if (object instanceof Enemy && !object.takingDamage) {
-      const knockback = object instanceof BossEnemy ? 0.2 : 1.2;
-      object.velocity = this.velocity.multiply(vec2(knockback));
+      object.velocity = this.velocity.multiply(vec2(object instanceof BossEnemy ? 0.2 : 1.2));
       object.takingDamage = true;
       object.hp -= this.damage;
       soundAttackHit.play();

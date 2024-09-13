@@ -34,7 +34,7 @@ class Player extends EngineObject {
     this.setCollision(); // make object collide
     this.velocity = vec2(0);
     this.isInvulnerable = false;
-    this.hp = 100;
+    this.hp = 10;
     this.faceAngle = 0;
     this.velocityAngle = vec2(1, 0);
     this.damage = 10;

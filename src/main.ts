@@ -8,7 +8,6 @@ import {
   drawText,
   drawTile,
   engineInit,
-  gamepadWasPressed,
   mouseWasPressed,
   randInt,
   randSign,
@@ -29,7 +28,7 @@ import Enemy, { BossEnemy, SmallEnemy } from './enemy';
 import { music, soundBossRoar } from './sound';
 import Item, { Type } from './item';
 import { darkM, lightM } from './particles';
-import s3 from './s3.png';
+import s from './s3.png';
 
 type GameState = 'title' | 'game' | 'over' | 'story';
 
@@ -39,14 +38,15 @@ setShowWatermark(false);
 export let player: Player;
 export const objects: Record<number, Enemy | Item> = {};
 
+let overTimeout: NodeJS.Timeout | null;
 export let difficultyMultiplier = 1;
 export let gameState: GameState = 'title';
-export const LEVEL_SIZE = vec2(30, 30);
+export const LEVEL = vec2(30, 30);
 
 export const blink = (a = 1) => new Color(0.65, 0.7, 0.54, a);
 
 setCameraScale(46);
-const BLACK_OVERLAY = new Color(0.5, 0.5, 0.5, 1);
+const OVERLAY = new Color(0.5, 0.5, 0.5, 1);
 
 let killCount = 0;
 let bossKill = 0;
@@ -66,7 +66,7 @@ const story = `
 ///////////////////////////////////////////////////////////////////////////////
 
 export function clampPosition(pos: Vector2) {
-  return vec2(clamp(pos.x, 0, LEVEL_SIZE.x - 1), clamp(pos.y, 0, LEVEL_SIZE.y - 1.25));
+  return vec2(clamp(pos.x, 0, LEVEL.x - 1), clamp(pos.y, 0, LEVEL.y - 1.25));
 }
 
 function drawShadow(pos: Vector2, isBoss?: boolean) {
@@ -86,7 +86,8 @@ export function increaseDifficulty() {
 function initGame() {
   setCameraScale(46);
   player?.destroy();
-  player = new Player(LEVEL_SIZE.divide(vec2(2)));
+  overTimeout = null;
+  player = new Player(LEVEL.divide(vec2(2)));
   for (const key of Object.keys(objects)) {
     objects[Number(key)].destroy();
     delete objects[Number(key)];
@@ -96,6 +97,8 @@ function initGame() {
   spawnInterval = 2;
   objectIndex = 0;
   spawnInitialEnemies();
+  music.play(undefined, 0.75, undefined, undefined, true);
+  gameState = 'game';
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -105,8 +108,8 @@ function renderTitle() {
   setFontDefault('monospace');
   drawText("I DON'T KNOW", vec2(0, -1), 2, lightM);
   drawText('WHAT THE TITLE SHOULD BE', vec2(0, -2.2), 1, lightM);
-  drawTile(vec2(-6, 2), vec2(10, 5), tile(3, vec2(32, 18)), BLACK_OVERLAY.scale(0.7));
-  drawTile(vec2(4, 2), vec2(10, 5), tile(3, vec2(32, 18)), BLACK_OVERLAY);
+  drawTile(vec2(-6, 2), vec2(10, 5), tile(3, vec2(32, 18)), OVERLAY.scale(0.7));
+  drawTile(vec2(4, 2), vec2(10, 5), tile(3, vec2(32, 18)), OVERLAY);
   drawTile(vec2(0, 2), vec2(12, 6), tile(3, vec2(32, 18)));
 
   drawText('Start game', vec2(0, -5), 1, lightM.mutate(0, wave(1, 1)), 0.1, darkM);
@@ -139,24 +142,24 @@ function renderGameOver() {
 ///////////////////////////////////////////////////////////////////////////////
 
 function drawArena() {
-  for (let x = 0; x < LEVEL_SIZE.x; x++) {
-    for (let y = 0; y < LEVEL_SIZE.y; y++) {
+  for (let x = 0; x < LEVEL.x; x++) {
+    for (let y = 0; y < LEVEL.y; y++) {
       drawTile(vec2(x, y), vec2(1), tile(8, 16));
     }
   }
 
   // draw top bottom wall
-  for (let x = 0; x < LEVEL_SIZE.x; x++) {
-    drawTile(vec2(x, -1), vec2(1.1), tile(17), BLACK_OVERLAY);
-    drawTile(vec2(x, LEVEL_SIZE.y + 1), vec2(1.1), tile(17), BLACK_OVERLAY);
-    drawTile(vec2(x, LEVEL_SIZE.y), vec2(1.1), tile(17), lightM, undefined, true);
-    drawTile(vec2(x, LEVEL_SIZE.y - 1), vec2(1.1), tile(17), lightM, undefined, true);
+  for (let x = 0; x < LEVEL.x; x++) {
+    drawTile(vec2(x, -1), vec2(1.1), tile(17), OVERLAY);
+    drawTile(vec2(x, LEVEL.y + 1), vec2(1.1), tile(17), OVERLAY);
+    drawTile(vec2(x, LEVEL.y), vec2(1.1), tile(17), lightM, undefined, true);
+    drawTile(vec2(x, LEVEL.y - 1), vec2(1.1), tile(17), lightM, undefined, true);
   }
 
   // draw left right wall
-  for (let y = -1; y < LEVEL_SIZE.y + 2; y++) {
-    drawTile(vec2(-1, y), vec2(1.1), tile(17), BLACK_OVERLAY);
-    drawTile(vec2(LEVEL_SIZE.x, y), vec2(1.1), tile(17), BLACK_OVERLAY);
+  for (let y = -1; y < LEVEL.y + 2; y++) {
+    drawTile(vec2(-1, y), vec2(1.1), tile(17), OVERLAY);
+    drawTile(vec2(LEVEL.x, y), vec2(1.1), tile(17), OVERLAY);
   }
 
   for (const e of Object.values([player, ...Object.values(objects)])) drawShadow(e.pos, e instanceof BossEnemy);
@@ -169,26 +172,23 @@ export function spawnItem(pos: Vector2, type?: Type) {
 }
 
 function spawnEnemy(position?: Vector2) {
-  const spawnPosition = position || vec2(0);
+  let pos = position || vec2(0);
   if (!position) {
     if (randSign() === 1) {
       // spawn from left right
-      spawnPosition.y = randInt(-2, LEVEL_SIZE.y + 2);
-      spawnPosition.x = randSign() === 1 ? -4 : LEVEL_SIZE.x + 4;
+      pos = vec2(randSign() === 1 ? -4 : LEVEL.x + 4, randInt(-2, LEVEL.y + 2));
     } else {
       // spawn from bottom
-      spawnPosition.y = -4;
-      spawnPosition.x = randInt(0, LEVEL_SIZE.x);
+      pos = vec2(randInt(0, LEVEL.x), -4);
     }
   }
-  objects[objectIndex] = new SmallEnemy(objectIndex++, spawnPosition);
+  objects[objectIndex] = new SmallEnemy(objectIndex++, pos);
   spawnTimer.set(Math.max(spawnInterval - 0.2 * bossKill, 0.5));
 }
 
 function spawnInitialEnemies() {
   for (let i = 0; i < 3; i++) {
-    const offset = randInt(5, 12);
-    spawnEnemy(player.pos.add(vec2(randSign() * offset, randSign() * offset)));
+    spawnEnemy(player.pos.add(vec2(randSign() * randInt(5, 12), randSign() * randInt(5, 12))));
   }
 }
 
@@ -220,22 +220,23 @@ function gameUpdate() {
       if (player.hp <= 0) {
         music.stop();
         setCameraScale(Math.min(cameraScale + 2, 88));
-        setTimeout(() => {
-          setCameraScale(46);
-          gameState = 'over';
-          player.destroy();
-        }, 2000);
+        if (!overTimeout) {
+          overTimeout = setTimeout(() => {
+            console.log('go to game over');
+            setCameraScale(46);
+            gameState = 'over';
+            player.destroy();
+          }, 2000);
+        }
       }
       break;
     case 'title':
-      if (mouseWasPressed(0) || gamepadWasPressed(0)) gameState = 'story';
+      if (mouseWasPressed(0)) gameState = 'story';
       break;
     case 'story':
     case 'over':
-      if (mouseWasPressed(0) || gamepadWasPressed(0)) {
+      if (mouseWasPressed(0)) {
         initGame();
-        music.play(undefined, 0.75, undefined, undefined, true);
-        gameState = 'game';
       }
       break;
   }
@@ -247,8 +248,7 @@ function gameUpdatePost() {
   // setup camera and prepare for render
   switch (gameState) {
     case 'game':
-      player.hp > 0 &&
-        setCameraPos(vec2(clamp(player?.pos.x, 12, LEVEL_SIZE.x - 12), clamp(player?.pos.y, 5, LEVEL_SIZE.y - 5)));
+      player.hp > 0 && setCameraPos(vec2(clamp(player?.pos.x, 12, LEVEL.x - 12), clamp(player?.pos.y, 5, LEVEL.y - 5)));
       if (spawnTimer.elapsed()) spawnEnemy();
       break;
     case 'title':
@@ -282,17 +282,13 @@ function gameRender() {
 function gameRenderPost() {
   // called after objects are rendered
   // draw effects or hud that appear above all objects
+  const healthPos = player ? vec2(player.pos.x - 1, player.pos.y + 1) : vec2(0);
   switch (gameState) {
     case 'game':
-      drawLine(
-        vec2(player.pos.x - 1, player.pos.y + 1),
-        vec2(player.pos.x + 1, player.pos.y + 1),
-        0.1,
-        new Color(0.2, 0.2, 0.2),
-      );
+      drawLine(healthPos, vec2(player.pos.x + 1, player.pos.y + 1), 0.1, new Color(0.2, 0.2, 0.2));
 
       drawLine(
-        vec2(player.pos.x - 1, player.pos.y + 1),
+        healthPos,
         vec2(player.pos.x - 1 + 2 * (player.hp / 100), player.pos.y + 1),
         0.1,
         new Color().setHex('#737f52'),
@@ -301,7 +297,7 @@ function gameRenderPost() {
       drawText(player.hp + '/' + String(100), vec2(player.pos.x, player.pos.y + 1), 0.35, new Color(1, 1, 1));
 
       drawRect(vec2(-4.6, 0), vec2(-6, 100), new Color(0, 0, 0));
-      drawRect(vec2(LEVEL_SIZE.x + 3.5, 0), vec2(6, 100), new Color(0, 0, 0));
+      drawRect(vec2(LEVEL.x + 3.5, 0), vec2(6, 100), new Color(0, 0, 0));
       drawRect(vec2(0, -4.5), vec2(100, 6), new Color(0, 0, 0));
 
       drawRect(vec2(cameraPos.x, cameraPos.y - 7), vec2(80, 2), new Color().setHex('#262a1b'));
@@ -324,4 +320,4 @@ function gameRenderPost() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Startup LittleJS Engine
-engineInit(gameInit, gameUpdate, gameUpdatePost, gameRender, gameRenderPost, [s3]);
+engineInit(gameInit, gameUpdate, gameUpdatePost, gameRender, gameRenderPost, [s]);

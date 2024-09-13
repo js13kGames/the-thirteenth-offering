@@ -1,6 +1,6 @@
 import { EngineObject, ParticleEmitter, randSign, tile, vec2, Vector2 } from 'littlejsengine';
 import Player from './player';
-import { soundHeal, soundPowerUp } from './sound';
+import { soundHeal } from './sound';
 
 import { gameState, objects } from './main';
 import { emitParticle } from './particles';
@@ -34,12 +34,11 @@ class Item extends EngineObject {
 
   collideWithObject(object: EngineObject): boolean {
     if (object instanceof Player) {
+      soundHeal.play();
       if (this.type === 'heart') {
-        soundHeal.play();
         object.updateHp(object.hp + 25);
       } else {
         object.swordLvl += 1;
-        soundPowerUp.play();
       }
       emitParticle({ pos: this.pos });
       delete objects[this.index];
