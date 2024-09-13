@@ -1,7 +1,7 @@
 # THE THIRTEENTH OFFERING
 <img width="1238" alt="Screenshot 2024-09-13 at 16 41 50" src="https://github.com/user-attachments/assets/b75792fd-a22a-4754-8138-470b7ff5b2b9">
 
-My first try at coding a game and being submitted to [JS13KGames](https://js13kgames.com/) 2024
+My first try at coding a game and being submitted to [JS13KGames](https://js13kgames.com/) 2024 with the theme of **Triskaidekaphobia**.
 
 ---
 ### Game
