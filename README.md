@@ -27,5 +27,6 @@ $ npm run dev
 ### Created with:
 
 - LittleJS - https://github.com/KilledByAPixel/LittleJS
-- Piskel - https://www.piskelapp.com/
+- Sprites drawn with Piskel - https://www.piskelapp.com/
 - JS13k Starter - https://github.com/codyebberson/js13k-starter
+- Music composed with ZzFXM - https://keithclark.github.io/ZzFXM/
