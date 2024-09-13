@@ -7,7 +7,7 @@ class Attack extends EngineObject {
   spawnTimer: Timer;
   damage: number;
   constructor(pos: Vector2, size: Vector2, angle: number, direction: Vector2, damage: number, swordLv: number) {
-    super(pos, size, tile(12), angle);
+    super(pos, size, tile(11), angle);
     this.velocity = direction.multiply(vec2(0.2 + swordLv * 0.02));
     this.damage = damage;
     this.spawnTimer = new Timer(0.2);

@@ -13,7 +13,7 @@ import {
   spawnItem,
 } from './main';
 
-import { soundBossSummon, soundEnemyDie } from './sound';
+import { soundBossSummon } from './sound';
 import { emitParticle } from './particles';
 
 const BASE_VELOCITY = 0.025;
@@ -44,7 +44,6 @@ class Enemy extends EngineObject {
     this.color = this.takingDamage ? blink() : new Color();
 
     if (this.hp <= 0) {
-      soundEnemyDie.play();
       emitParticle({ pos: this.pos, isDark: false });
       delete objects[this.index];
       this.destroy();
@@ -66,7 +65,7 @@ export class SmallEnemy extends Enemy {
 
   update(): void {
     super.update();
-    this.tileInfo = tile([9, 10, 11, 10][Math.floor(wave(4, 3.9))]);
+    this.tileInfo = tile([8, 8, 9, 9][Math.floor(wave(4, 3.9))]);
     if (this.hp <= 0) {
       if (randInt(1, 100) > 90) spawnItem(this.pos, 'heart');
       if (shouldSpawnBoss()) {

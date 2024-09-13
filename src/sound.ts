@@ -24,11 +24,9 @@ export const soundAttack = new Sound([
   774,
 ]);
 export const soundHeal = new Sound([1.1, , 327, 0.01, 0.02, 0.15, , 3.6, 10, , , , , , , , , 0.53]);
-export const soundDamaged = new Sound([1.9, , 336, , 0.03, 0.14, 3, 1.6, , -3, , , , 1.9, , 0.2, , 0.49, , , 200]);
 export const soundAttackHit = new Sound([, , 351, , 0.01, , 3, 1.3, 7, , , , , 0.9, , 0.4, , 0.67, 0.07, 0.33]);
 export const soundBossSummon = new Sound([2.5, , 95, 0.06, 0.02, 0.38, , 4.4, 2, , , , , 1.6, , 0.5, 0.42, 0.35, 0.24]);
 export const soundBossRoar = new Sound([3, , 50, 0.05, 0.19, 0.54, , , 8, , , , 0.28, 1, , 0.9, 0.5, 0.33, 0.29, 0.25]);
-export const soundEnemyDie = new Sound([1.1, , 356, , 0.03, 0.25, 2, 3.6, , 4, , , , 1, , 0.3, , 0.69, 0.05, 0.38]);
 
 export const music = new Music([
   [

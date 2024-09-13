@@ -15,7 +15,7 @@ class Item extends EngineObject {
   constructor(index: number, pos: Vector2, type?: Type) {
     const randomType = randSign() === 1 ? 'heart' : 'sword';
     const appliedType = type || randomType;
-    const sprite = appliedType === 'heart' ? tile(3) : tile(12);
+    const sprite = appliedType === 'heart' ? tile(3) : tile(11);
     super(pos, vec2(1), sprite);
     this.setCollision();
     this.type = appliedType;

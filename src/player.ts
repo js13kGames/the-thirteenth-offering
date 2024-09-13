@@ -3,7 +3,7 @@ import Enemy from './enemy';
 import { blink, clampPosition } from './main';
 import Attack from './attack';
 import { emitParticle } from './particles';
-import { soundDamaged } from './sound';
+import { soundAttackHit } from './sound';
 
 const BASE_VELOCITY = 0.1;
 const MOVEMENT_KEY = { RIGHT: 'ArrowRight', LEFT: 'ArrowLeft', UP: 'ArrowUp', DOWN: 'ArrowDown' };
@@ -34,7 +34,7 @@ class Player extends EngineObject {
     this.setCollision(); // make object collide
     this.velocity = vec2(0);
     this.isInvulnerable = false;
-    this.hp = 10;
+    this.hp = 100;
     this.faceAngle = 0;
     this.velocityAngle = vec2(1, 0);
     this.damage = 10;
@@ -72,10 +72,10 @@ class Player extends EngineObject {
   move() {
     if (this.isDead()) return;
     const direction = vec2(0);
-    if (keyIsDown('ArrowRight')) direction.x = 1;
-    if (keyIsDown('ArrowLeft')) direction.x = -1;
-    if (keyIsDown('ArrowUp')) direction.y = 1;
-    if (keyIsDown('ArrowDown')) direction.y = -1;
+    if (keyIsDown(MOVEMENT_KEY.RIGHT)) direction.x = 1;
+    if (keyIsDown(MOVEMENT_KEY.LEFT)) direction.x = -1;
+    if (keyIsDown(MOVEMENT_KEY.UP)) direction.y = 1;
+    if (keyIsDown(MOVEMENT_KEY.DOWN)) direction.y = -1;
     this.pos = this.pos.add(vec2(direction.x * BASE_VELOCITY, direction.y * BASE_VELOCITY));
     if (direction.length()) {
       this.faceAngle = ANGLES[`${direction.x}${direction.y}`];
@@ -119,7 +119,7 @@ class Player extends EngineObject {
       this.velocity = direction.multiply(vec2(-BASE_VELOCITY * 2));
       object.velocity = direction.multiply(vec2(BASE_VELOCITY * 2));
       emitParticle({ pos: this.pos });
-      soundDamaged.play();
+      soundAttackHit.play();
 
       this.isInvulnerable = true;
       setTimeout(() => {

@@ -28,7 +28,7 @@ import Enemy, { BossEnemy, SmallEnemy } from './enemy';
 import { music, soundBossRoar } from './sound';
 import Item, { Type } from './item';
 import { darkM, lightM } from './particles';
-import s from './s3.png';
+import s from './s.png';
 
 type GameState = 'title' | 'game' | 'over' | 'story';
 
@@ -55,13 +55,12 @@ let spawnInterval = 1.5;
 const spawnTimer = new Timer(spawnInterval);
 
 const story = `
- When thirteen souls are sacrificed, a demon rises. 
+ When 13 souls are sacrificed, a demon rises. 
  
- A dark cult is trying revive those demons, 
- using the kidnapped villagers as sacrifices.
+ A dark cult is trying revive those demons. 
  
- With courage in your heart, 
- you set out to put an end to the cult's darkness.`;
+ Knowing this, 
+ you set out to end the cult.`;
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -106,13 +105,12 @@ function initGame() {
 function renderTitle() {
   setCameraPos(vec2(0, 0));
   setFontDefault('monospace');
-  drawText("I DON'T KNOW", vec2(0, -1), 2, lightM);
-  drawText('WHAT THE TITLE SHOULD BE', vec2(0, -2.2), 1, lightM);
+  drawText('THE THIRTEENTH OFFERING', vec2(0, -1), 1.2, lightM, 0.25, darkM);
   drawTile(vec2(-6, 2), vec2(10, 5), tile(3, vec2(32, 18)), OVERLAY.scale(0.7));
   drawTile(vec2(4, 2), vec2(10, 5), tile(3, vec2(32, 18)), OVERLAY);
   drawTile(vec2(0, 2), vec2(12, 6), tile(3, vec2(32, 18)));
 
-  drawText('Start game', vec2(0, -5), 1, lightM.mutate(0, wave(1, 1)), 0.1, darkM);
+  drawText('Start game', vec2(0, -5), 0.7, lightM.mutate(0, wave(1, 1)), 0.1, darkM);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -120,7 +118,7 @@ function renderTitle() {
 function renderStory() {
   setCameraPos(vec2(0));
   drawText(story, vec2(0, 5), 0.8, lightM);
-  drawText('Click to start', vec2(0, -5.5), 0.9, lightM.mutate(0, wave(1, 1)), 0.1, darkM);
+  drawText('Click to start', vec2(0, -5.5), 0.7, lightM.mutate(0, wave(1, 1)), 0.1, darkM);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -130,13 +128,12 @@ function renderGameOver() {
   for (const e of Object.values(objects)) e.destroy();
   setCameraPos(vec2(0, 0));
   const blood = new Color().setHex('#737f52');
-  drawRect(vec2(0.5, 1.25), vec2(1.5, 0.5), blood);
-  drawRect(vec2(-0.5, 1.5), vec2(1, 0.5), blood);
-  drawRect(vec2(-1.5, 1.3), vec2(0.5, 0.2), blood);
+  drawRect(vec2(0, 1.25), vec2(1.5, 0.5), blood);
+  drawRect(vec2(-1, 1.3), vec2(0.5, 0.2), blood);
   drawRect(vec2(-2, 1.5), vec2(0.2, 0.1), blood);
   drawText('Game Over', vec2(0, -0.5), 2, lightM);
   drawText('Click to try again', vec2(0, -3.5), 0.6, lightM);
-  drawTile(vec2(1, 2), vec2(2), tile(1), undefined, -1.65);
+  drawTile(vec2(0.5, 2), vec2(2), tile(1), undefined, -1.65);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -144,22 +141,27 @@ function renderGameOver() {
 function drawArena() {
   for (let x = 0; x < LEVEL.x; x++) {
     for (let y = 0; y < LEVEL.y; y++) {
-      drawTile(vec2(x, y), vec2(1), tile(8, 16));
+      drawTile(
+        vec2(x, y),
+        vec2(1),
+        undefined,
+        (x + y) % (x - y + 7) === 0 ? new Color(0.68, 0.72, 0.6) : new Color(0.7, 0.75, 0.6),
+      );
     }
   }
 
   // draw top bottom wall
   for (let x = 0; x < LEVEL.x; x++) {
-    drawTile(vec2(x, -1), vec2(1.1), tile(17), OVERLAY);
-    drawTile(vec2(x, LEVEL.y + 1), vec2(1.1), tile(17), OVERLAY);
-    drawTile(vec2(x, LEVEL.y), vec2(1.1), tile(17), lightM, undefined, true);
-    drawTile(vec2(x, LEVEL.y - 1), vec2(1.1), tile(17), lightM, undefined, true);
+    drawTile(vec2(x, -1), vec2(1.1), tile(10), OVERLAY);
+    drawTile(vec2(x, LEVEL.y + 1), vec2(1.1), tile(10), OVERLAY);
+    drawTile(vec2(x, LEVEL.y), vec2(1.1), tile(10), lightM, undefined, true);
+    drawTile(vec2(x, LEVEL.y - 1), vec2(1.1), tile(10), lightM, undefined, true);
   }
 
   // draw left right wall
   for (let y = -1; y < LEVEL.y + 2; y++) {
-    drawTile(vec2(-1, y), vec2(1.1), tile(17), OVERLAY);
-    drawTile(vec2(LEVEL.x, y), vec2(1.1), tile(17), OVERLAY);
+    drawTile(vec2(-1, y), vec2(1.1), tile(10), OVERLAY);
+    drawTile(vec2(LEVEL.x, y), vec2(1.1), tile(10), OVERLAY);
   }
 
   for (const e of Object.values([player, ...Object.values(objects)])) drawShadow(e.pos, e instanceof BossEnemy);
@@ -305,10 +307,10 @@ function gameRenderPost() {
       drawTile(vec2(cameraPos.x - 12, cameraPos.y - 7), vec2(1), tile(3));
       drawText(`${player.hp}/100`, vec2(cameraPos.x - 10.3, cameraPos.y - 7), 0.5, new Color(1, 1, 1));
 
-      drawTile(vec2(cameraPos.x - 8, cameraPos.y - 6.9), vec2(0.75), tile(12));
+      drawTile(vec2(cameraPos.x - 8, cameraPos.y - 6.9), vec2(0.75), tile(11));
       drawText(`Lv. ${player.swordLvl}`, vec2(cameraPos.x - 6.8, cameraPos.y - 7), 0.5, new Color(1, 1, 1));
 
-      drawTile(vec2(cameraPos.x + 7, cameraPos.y - 6.9), vec2(0.75), tile(10));
+      drawTile(vec2(cameraPos.x + 7, cameraPos.y - 6.9), vec2(0.75), tile(9));
       drawText(`x ${killCount}`, vec2(cameraPos.x + 8, cameraPos.y - 7), 0.5, new Color(1, 1, 1));
 
       drawTile(vec2(cameraPos.x + 10, cameraPos.y - 6.85), vec2(1.5, 0.75), tile(3, vec2(32, 16)));
