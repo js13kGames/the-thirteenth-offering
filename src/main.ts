@@ -126,10 +126,11 @@ function renderGameOver() {
   player.destroy();
   for (const e of Object.values(objects)) e.destroy();
   setCameraPos(vec2(0, 0));
-  drawRect(vec2(0.5, 1.25), vec2(1.5, 0.5), new Color(0.5, 0.1, 0.2));
-  drawRect(vec2(-0.5, 1.5), vec2(1, 0.5), new Color(0.5, 0.1, 0.2));
-  drawRect(vec2(-1.5, 1.3), vec2(0.5, 0.2), new Color(0.5, 0.1, 0.2));
-  drawRect(vec2(-2, 1.5), vec2(0.2, 0.1), new Color(0.5, 0.1, 0.2));
+  const blood = new Color().setHex('#737f52');
+  drawRect(vec2(0.5, 1.25), vec2(1.5, 0.5), blood);
+  drawRect(vec2(-0.5, 1.5), vec2(1, 0.5), blood);
+  drawRect(vec2(-1.5, 1.3), vec2(0.5, 0.2), blood);
+  drawRect(vec2(-2, 1.5), vec2(0.2, 0.1), blood);
   drawText('Game Over', vec2(0, -0.5), 2, lightM);
   drawText('Click to try again', vec2(0, -3.5), 0.6, lightM);
   drawTile(vec2(1, 2), vec2(2), tile(1), undefined, -1.65);
@@ -181,13 +182,13 @@ function spawnEnemy(position?: Vector2) {
     }
   }
   objects[objectIndex] = new SmallEnemy(objectIndex++, spawnPosition);
+  spawnTimer.set(Math.max(spawnInterval - 0.2 * bossKill, 0.5));
 }
 
 function spawnInitialEnemies() {
   for (let i = 0; i < 3; i++) {
     const offset = randInt(5, 12);
-    const p = player.pos.add(vec2(randSign() * offset, randSign() * offset));
-    spawnEnemy(p);
+    spawnEnemy(player.pos.add(vec2(randSign() * offset, randSign() * offset)));
   }
 }
 
@@ -208,8 +209,6 @@ export function spawnBoss(pos: Vector2) {
 
 ///////////////////////////////////////////////////////////////////////////////
 function gameInit() {
-  // called once after the engine starts up
-  // setup the game
   setCanvasFixedSize(vec2(1280, 720)); // use a 720p fixed size canvas
 }
 
@@ -229,15 +228,13 @@ function gameUpdate() {
       }
       break;
     case 'title':
-      if (mouseWasPressed(0) || gamepadWasPressed(0)) {
-        gameState = 'story';
-      }
+      if (mouseWasPressed(0) || gamepadWasPressed(0)) gameState = 'story';
       break;
     case 'story':
     case 'over':
       if (mouseWasPressed(0) || gamepadWasPressed(0)) {
         initGame();
-        music.play(undefined, 0.6, undefined, undefined, true);
+        music.play(undefined, 0.75, undefined, undefined, true);
         gameState = 'game';
       }
       break;
@@ -252,10 +249,7 @@ function gameUpdatePost() {
     case 'game':
       player.hp > 0 &&
         setCameraPos(vec2(clamp(player?.pos.x, 12, LEVEL_SIZE.x - 12), clamp(player?.pos.y, 5, LEVEL_SIZE.y - 5)));
-      if (spawnTimer.elapsed()) {
-        spawnEnemy();
-        spawnTimer.set(Math.max(spawnInterval - 0.2 * bossKill, 0.5));
-      }
+      if (spawnTimer.elapsed()) spawnEnemy();
       break;
     case 'title':
     case 'over':
@@ -294,14 +288,14 @@ function gameRenderPost() {
         vec2(player.pos.x - 1, player.pos.y + 1),
         vec2(player.pos.x + 1, player.pos.y + 1),
         0.1,
-        new Color(0.4, 0.4, 0.4),
+        new Color(0.2, 0.2, 0.2),
       );
 
       drawLine(
         vec2(player.pos.x - 1, player.pos.y + 1),
         vec2(player.pos.x - 1 + 2 * (player.hp / 100), player.pos.y + 1),
         0.1,
-        new Color(1, 0.4, 0.4),
+        new Color().setHex('#737f52'),
       );
 
       drawText(player.hp + '/' + String(100), vec2(player.pos.x, player.pos.y + 1), 0.35, new Color(1, 1, 1));

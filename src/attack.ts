@@ -1,6 +1,6 @@
 import { clamp, Color, EngineObject, tile, Timer, vec2, Vector2 } from 'littlejsengine';
 import Enemy, { BossEnemy } from './enemy';
-import { damageParticle } from './particles';
+import { emitParticle } from './particles';
 import { soundAttack, soundAttackHit } from './sound';
 
 class Attack extends EngineObject {
@@ -30,7 +30,7 @@ class Attack extends EngineObject {
       object.takingDamage = true;
       object.hp -= this.damage;
       soundAttackHit.play();
-      damageParticle(this.pos, true, this.velocity.angle());
+      emitParticle({ pos: this.pos, isDark: true, angle: this.velocity.angle() });
       setTimeout(() => {
         object.velocity = vec2(0, 0);
         object.takingDamage = false;

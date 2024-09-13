@@ -2,8 +2,8 @@ import { clamp, Color, EngineObject, keyIsDown, tile, Timer, vec2, Vector2, wave
 import Enemy from './enemy';
 import { blink, clampPosition } from './main';
 import Attack from './attack';
-import { damageParticle } from './particles';
-import { soundBossRoar, soundDamaged } from './sound';
+import { emitParticle } from './particles';
+import { soundDamaged } from './sound';
 
 const BASE_VELOCITY = 0.1;
 const MOVEMENT_KEY = { RIGHT: 'ArrowRight', LEFT: 'ArrowLeft', UP: 'ArrowUp', DOWN: 'ArrowDown' };
@@ -54,8 +54,11 @@ class Player extends EngineObject {
     }
   }
 
-  checkIsMoving() {
-    return Object.values(MOVEMENT_KEY).some((key) => keyIsDown(key));
+  animate() {
+    this.tileInfo = tile(1);
+    if (Object.values(MOVEMENT_KEY).some((key) => keyIsDown(key))) {
+      this.tileInfo = tile([1, 2, 1, 0][Math.floor(wave(16, 4))]);
+    }
   }
 
   isDead() {
@@ -75,8 +78,7 @@ class Player extends EngineObject {
     if (keyIsDown('ArrowDown')) direction.y = -1;
     this.pos = this.pos.add(vec2(direction.x * BASE_VELOCITY, direction.y * BASE_VELOCITY));
     if (direction.length()) {
-      const angleKey = `${direction.x}${direction.y}`;
-      this.faceAngle = ANGLES[angleKey];
+      this.faceAngle = ANGLES[`${direction.x}${direction.y}`];
     }
     if (direction.length()) {
       this.velocityAngle = direction;
@@ -87,12 +89,11 @@ class Player extends EngineObject {
 
   update(): void {
     this.move();
-    this.checkIsMoving();
+    this.animate();
     this.invulnerable();
 
     if (attackTimer.elapsed()) {
       this.spawnAttack();
-      attackTimer.unset();
       attackTimer.set(1 - (this.swordLvl - 1) * 0.05);
     }
 
@@ -101,21 +102,11 @@ class Player extends EngineObject {
       this.angle = -1.65;
     }
 
-    if (this.checkIsMoving()) {
-      this.tileInfo = tile([1, 2, 1, 0][Math.floor(wave(16, 4))]);
-    } else {
-      this.tileInfo = tile(1);
-    }
-
     super.update();
   }
 
   invulnerable() {
-    if (this.isInvulnerable) {
-      this.color = blink(wave(100, 2) / 1.2);
-    } else {
-      this.color = new Color(1, 1, 1, 1);
-    }
+    this.color = this.isInvulnerable ? blink(wave(100, 2) / 1.2) : new Color(1, 1, 1, 1);
   }
 
   collideWithObject(object: EngineObject): boolean {
@@ -124,12 +115,10 @@ class Player extends EngineObject {
     if (distance > 1 || this.isDead()) return false; // add threshold to be damaged
     if (object instanceof Enemy && !this.isInvulnerable) {
       this.updateHp(this.hp - object.damage);
-      const directionX = Math.sign(object.pos.x - this.pos.x);
-      const directionY = Math.sign(object.pos.y - this.pos.y);
-      this.velocity = vec2(directionX * -BASE_VELOCITY * 2, directionY * -BASE_VELOCITY * 2);
-      object.velocity = vec2(directionX * BASE_VELOCITY * 2, directionY * BASE_VELOCITY * 2);
-
-      damageParticle(this.pos, false);
+      const direction = object.pos.subtract(this.pos);
+      this.velocity = direction.multiply(vec2(-BASE_VELOCITY * 2));
+      object.velocity = direction.multiply(vec2(BASE_VELOCITY * 2));
+      emitParticle({ pos: this.pos });
       soundDamaged.play();
 
       this.isInvulnerable = true;
@@ -137,12 +126,6 @@ class Player extends EngineObject {
         this.velocity = vec2(0, 0);
         object.velocity = vec2(0, 0);
       }, 100);
-
-      if (this.hp <= 0) {
-        setTimeout(() => {
-          soundBossRoar.play();
-        }, 2000);
-      }
 
       setTimeout(() => {
         this.isInvulnerable = false;

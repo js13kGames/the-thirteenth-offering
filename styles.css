@@ -4,10 +4,7 @@
   image-rendering: pixelated;
 }
 
-/* Get rid of any margins, set background black, use flexbox to center */
 html,
 body {
   margin: 0;
-  background-color: red;
-  height: 100%;
 }

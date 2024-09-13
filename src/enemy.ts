@@ -12,8 +12,9 @@ import {
   spawnBoss,
   spawnItem,
 } from './main';
-import { damageParticle, fountainParticle } from './particles';
+
 import { soundBossSummon, soundEnemyDie } from './sound';
+import { emitParticle } from './particles';
 
 const BASE_VELOCITY = 0.025;
 const ENEMY_BASE_HP = 20;
@@ -44,7 +45,7 @@ class Enemy extends EngineObject {
 
     if (this.hp <= 0) {
       soundEnemyDie.play();
-      damageParticle(this.pos, false);
+      emitParticle({ pos: this.pos, isDark: false });
       delete objects[this.index];
       this.destroy();
     }
@@ -69,10 +70,9 @@ export class SmallEnemy extends Enemy {
     this.tileInfo = tile([9, 10, 11, 10][Math.floor(wave(4, 3.9))]);
     if (this.hp <= 0) {
       if (randInt(1, 100) > 90) spawnItem(this.pos, 'heart');
-      const bossAppear = shouldSpawnBoss();
-      if (bossAppear) {
+      if (shouldSpawnBoss()) {
         soundBossSummon.play();
-        const particle = fountainParticle(this.pos, true);
+        const particle = emitParticle({ pos: this.pos, isDark: true, isFountain: true, large: true });
 
         setTimeout(() => {
           setCameraPos(player.pos);
